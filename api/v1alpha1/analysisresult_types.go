@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,13 +40,6 @@ type AnalysisResultStatus struct {
 	// +kubebuilder:validation:MinItems=1
 	// +kubebuilder:validation:MaxItems=10
 	Options []RemediationOption `json:"options,omitempty"`
-
-	// components contains optional adapter-specific UI components.
-	// +optional
-	// +listType=atomic
-	// +kubebuilder:validation:MinItems=1
-	// +kubebuilder:validation:MaxItems=20
-	Components []apiextensionsv1.JSON `json:"components,omitempty"`
 
 	// sandbox tracks the sandbox pod used for this analysis.
 	// +optional

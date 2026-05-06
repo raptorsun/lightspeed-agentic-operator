@@ -7,8 +7,8 @@ import (
 )
 
 // Default JSON Schemas sent to the agent for LLM structured output enforcement.
-// Each phase has a known response shape. Components can override via
-// Tools.OutputSchema in the Proposal spec.
+// Each phase has a known response shape. For analysis, spec.outputSchema is
+// injected as a required "components" property in each option.
 
 var AnalysisOutputSchema = json.RawMessage(`{
   "type": "object",
@@ -200,6 +200,7 @@ func outputSchemaForStep(stepName string, proposal *agenticv1alpha1.Proposal) js
 	if stepName != "analysis" {
 		return defaultOutputSchemas[stepName]
 	}
+
 	required := []any{"title", "diagnosis", "proposal"}
 	if !proposal.Spec.Execution.IsZero() {
 		required = append(required, "rbac")
@@ -207,10 +208,22 @@ func outputSchemaForStep(stepName string, proposal *agenticv1alpha1.Proposal) js
 	if !proposal.Spec.Verification.IsZero() {
 		required = append(required, "verification")
 	}
+
 	var schema map[string]any
 	_ = json.Unmarshal(AnalysisOutputSchema, &schema)
 	options := schema["properties"].(map[string]any)["options"].(map[string]any)
 	items := options["items"].(map[string]any)
+
+	if proposal.Spec.OutputSchema != nil {
+		var components any
+		if b, err := json.Marshal(proposal.Spec.OutputSchema); err == nil {
+			_ = json.Unmarshal(b, &components)
+			props := items["properties"].(map[string]any)
+			props["components"] = components
+			required = append(required, "components")
+		}
+	}
+
 	items["required"] = required
 	result, _ := json.Marshal(schema)
 	return result

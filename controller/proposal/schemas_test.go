@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	agenticv1alpha1 "github.com/openshift/lightspeed-agentic-operator/api/v1alpha1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
 func TestDefaultOutputSchemas_AllPhasesPresent(t *testing.T) {
@@ -279,5 +280,64 @@ func TestExecutionOutputSchema_ActionsUseOutcomeNotSuccess(t *testing.T) {
 	}
 	if !requiredSet["outcome"] {
 		t.Error("'outcome' should be required in actionsTaken items")
+	}
+}
+
+func TestOutputSchemaForStep_WithOutputSchema_InjectsComponents(t *testing.T) {
+	proposal := &agenticv1alpha1.Proposal{}
+	proposal.Spec.OutputSchema = &apiextensionsv1.JSONSchemaProps{
+		Type: "object",
+		Properties: map[string]apiextensionsv1.JSONSchemaProps{
+			"foo": {Type: "string"},
+		},
+	}
+
+	schema := outputSchemaForStep("analysis", proposal)
+	var parsed map[string]any
+	if err := json.Unmarshal(schema, &parsed); err != nil {
+		t.Fatalf("invalid schema JSON: %v", err)
+	}
+
+	options := parsed["properties"].(map[string]any)["options"].(map[string]any)
+	items := options["items"].(map[string]any)
+	props := items["properties"].(map[string]any)
+	components, ok := props["components"]
+	if !ok {
+		t.Fatal("expected 'components' property in option items")
+	}
+	compMap := components.(map[string]any)
+	if compMap["type"] != "object" {
+		t.Errorf("components type = %v, want object", compMap["type"])
+	}
+	compProps := compMap["properties"].(map[string]any)
+	if _, ok := compProps["foo"]; !ok {
+		t.Error("components should contain 'foo' from outputSchema")
+	}
+
+	required := extractOptionRequired(t, schema)
+	if !required["components"] {
+		t.Error("'components' should be required when outputSchema is set")
+	}
+}
+
+func TestOutputSchemaForStep_WithoutOutputSchema_NoComponents(t *testing.T) {
+	proposal := &agenticv1alpha1.Proposal{}
+
+	schema := outputSchemaForStep("analysis", proposal)
+	var parsed map[string]any
+	if err := json.Unmarshal(schema, &parsed); err != nil {
+		t.Fatalf("invalid schema JSON: %v", err)
+	}
+
+	options := parsed["properties"].(map[string]any)["options"].(map[string]any)
+	items := options["items"].(map[string]any)
+	props := items["properties"].(map[string]any)
+	if _, ok := props["components"]; ok {
+		t.Error("should not have 'components' property when outputSchema is nil")
+	}
+
+	required := extractOptionRequired(t, schema)
+	if required["components"] {
+		t.Error("'components' should not be required when outputSchema is nil")
 	}
 }

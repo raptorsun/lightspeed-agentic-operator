@@ -349,12 +349,12 @@ type RemediationOption struct {
 	// actual Kubernetes RBAC resources. Omitted for advisory-only options.
 	// +optional
 	RBAC RBACResult `json:"rbac,omitzero"`
-	// components contains optional adapter-defined structured data for
-	// custom console UI rendering. Each entry is a raw JSON object.
-	// Maximum 20 items.
+	// components contains optional adapter-defined structured data whose
+	// shape is determined by spec.outputSchema on the Proposal. The
+	// operator passes this through to the AnalysisResult CR; the console
+	// renders it using adapter-specific UI components.
 	// +optional
-	// +listType=atomic
-	// +kubebuilder:validation:MinItems=1
-	// +kubebuilder:validation:MaxItems=20
-	Components []apiextensionsv1.JSON `json:"components,omitempty"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:pruning:PreserveUnknownFields
+	Components *apiextensionsv1.JSON `json:"components,omitempty"`
 }

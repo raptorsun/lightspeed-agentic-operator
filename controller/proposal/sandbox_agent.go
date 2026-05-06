@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -17,9 +16,8 @@ import (
 const defaultSandboxTimeout = 5 * time.Minute
 
 type analysisResponse struct {
-	Success    bool                                `json:"success"`
-	Options    []agenticv1alpha1.RemediationOption `json:"options"`
-	Components []apiextensionsv1.JSON              `json:"components,omitempty"`
+	Success bool                                `json:"success"`
+	Options []agenticv1alpha1.RemediationOption `json:"options"`
 }
 
 type executionResponse struct {
@@ -78,9 +76,8 @@ func (s *SandboxAgentCaller) Analyze(ctx context.Context, proposal *agenticv1alp
 	}
 
 	return &AnalysisOutput{
-		Success:    resp.Success,
-		Options:    resp.Options,
-		Components: resp.Components,
+		Success: resp.Success,
+		Options: resp.Options,
 	}, nil
 }
 
@@ -197,11 +194,6 @@ func (s *SandboxAgentCaller) callWithSandbox(
 	}
 
 	schema := outputSchemaForStep(stepName, proposal)
-	if step.Tools != nil && step.Tools.OutputSchema != nil {
-		if b, err := json.Marshal(step.Tools.OutputSchema); err == nil {
-			schema = b
-		}
-	}
 
 	client := s.ClientFactory(agentURL)
 	resp, err := client.Run(ctx, "", query, schema, agentCtx)

@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -216,6 +217,7 @@ func (s ProposalStep) IsZero() bool {
 //
 // +kubebuilder:validation:XValidation:rule="has(self.analysis)",message="analysis must be provided"
 // +kubebuilder:validation:XValidation:rule="!has(oldSelf.targetNamespaces) || (has(self.targetNamespaces) && self.targetNamespaces == oldSelf.targetNamespaces)",message="targetNamespaces is immutable once set"
+// +kubebuilder:validation:XValidation:rule="!has(oldSelf.outputSchema) || (has(self.outputSchema) && self.outputSchema == oldSelf.outputSchema)",message="outputSchema is immutable once set"
 // +kubebuilder:validation:XValidation:rule="!has(oldSelf.tools) || (has(self.tools) && self.tools == oldSelf.tools)",message="tools is immutable once set"
 // +kubebuilder:validation:XValidation:rule="!has(oldSelf.analysis) || (has(self.analysis) && self.analysis == oldSelf.analysis)",message="analysis is immutable once set"
 // +kubebuilder:validation:XValidation:rule="!has(oldSelf.execution) || (has(self.execution) && self.execution == oldSelf.execution)",message="execution is immutable once set"
@@ -254,8 +256,20 @@ type ProposalSpec struct {
 	// +kubebuilder:validation:items:MaxLength=63
 	TargetNamespaces []string `json:"targetNamespaces,omitempty"`
 
+	// outputSchema is a JSON Schema injected as a required "components"
+	// property in the analysis output. Use this to require adapter-specific
+	// structured data beyond the base analysis schema (diagnosis, proposal,
+	// RBAC, verification plan).
+	//
+	// Immutable: the output contract is fixed at creation.
+	// +optional
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=object
+	// +kubebuilder:pruning:PreserveUnknownFields
+	OutputSchema *apiextensionsv1.JSONSchemaProps `json:"outputSchema,omitempty"`
+
 	// tools defines the default tools for all steps: skills images,
-	// required secrets, and output schema. Per-step tools
+	// MCP servers, and required secrets. Per-step tools
 	// (analysis.tools, execution.tools, verification.tools) replace
 	// this default for individual steps.
 	//

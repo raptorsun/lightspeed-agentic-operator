@@ -245,13 +245,6 @@ func (in *AnalysisResultStatus) DeepCopyInto(out *AnalysisResultStatus) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.Components != nil {
-		in, out := &in.Components, &out.Components
-		*out = make([]apiextensionsv1.JSON, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
 	out.Sandbox = in.Sandbox
 }
 
@@ -1178,6 +1171,10 @@ func (in *ProposalSpec) DeepCopyInto(out *ProposalSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.OutputSchema != nil {
+		in, out := &in.OutputSchema, &out.OutputSchema
+		*out = (*in).DeepCopy()
+	}
 	in.Tools.DeepCopyInto(&out.Tools)
 	in.Analysis.DeepCopyInto(&out.Analysis)
 	in.Execution.DeepCopyInto(&out.Execution)
@@ -1321,10 +1318,8 @@ func (in *RemediationOption) DeepCopyInto(out *RemediationOption) {
 	in.RBAC.DeepCopyInto(&out.RBAC)
 	if in.Components != nil {
 		in, out := &in.Components, &out.Components
-		*out = make([]apiextensionsv1.JSON, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
+		*out = new(apiextensionsv1.JSON)
+		(*in).DeepCopyInto(*out)
 	}
 }
 
@@ -1521,10 +1516,6 @@ func (in *ToolsSpec) DeepCopyInto(out *ToolsSpec) {
 		in, out := &in.RequiredSecrets, &out.RequiredSecrets
 		*out = make([]SecretRequirement, len(*in))
 		copy(*out, *in)
-	}
-	if in.OutputSchema != nil {
-		in, out := &in.OutputSchema, &out.OutputSchema
-		*out = (*in).DeepCopy()
 	}
 }
 

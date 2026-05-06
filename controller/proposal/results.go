@@ -104,7 +104,6 @@ func (r *ProposalReconciler) createAnalysisResult(
 
 	if result != nil {
 		cr.Status.Options = result.Options
-		cr.Status.Components = result.Components
 	}
 
 	return crName, createIdempotent(ctx, r.Client, cr, "AnalysisResult")
