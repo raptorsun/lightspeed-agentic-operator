@@ -51,7 +51,6 @@ const (
 	reasonRetriesExhausted  = agenticv1alpha1.ReasonRetriesExhausted
 )
 
-
 // failStep marks a step as failed and creates a failure result CR.
 // The caller must have set the step condition to ConditionUnknown before
 // calling failStep so that conditionTime can extract the start time.

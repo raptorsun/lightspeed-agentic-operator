@@ -76,12 +76,12 @@ func TestLogs_ResolveSandbox_ExplicitStep(t *testing.T) {
 
 func TestLogs_ResolveSandbox_AutoDetect(t *testing.T) {
 	tests := []struct {
-		name       string
-		analysis   string
-		execution  string
-		verify     string
-		wantClaim  string
-		wantNil    bool
+		name      string
+		analysis  string
+		execution string
+		verify    string
+		wantClaim string
+		wantNil   bool
 	}{
 		{"prefer verification", "a-pod", "e-pod", "v-pod", "v-pod", false},
 		{"fallback to execution", "a-pod", "e-pod", "", "e-pod", false},

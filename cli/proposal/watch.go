@@ -29,7 +29,7 @@ type WatchOptions struct {
 func NewWatchCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &WatchOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{

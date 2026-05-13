@@ -28,14 +28,14 @@ type agentRunRequest struct {
 }
 
 type agentContext struct {
-	TargetNamespaces []string                        `json:"targetNamespaces,omitempty"`
-	PreviousAttempts []agentPreviousAttempt          `json:"previousAttempts,omitempty"`
+	TargetNamespaces []string                           `json:"targetNamespaces,omitempty"`
+	PreviousAttempts []agentPreviousAttempt             `json:"previousAttempts,omitempty"`
 	ApprovedOption   *agenticv1alpha1.RemediationOption `json:"approvedOption,omitempty"`
-	ExecutionResult  *agentExecutionResult           `json:"executionResult,omitempty"`
+	ExecutionResult  *agentExecutionResult              `json:"executionResult,omitempty"`
 }
 
 type agentExecutionResult struct {
-	Success      bool                                  `json:"success"`
+	Success      bool                                   `json:"success"`
 	ActionsTaken []agenticv1alpha1.ExecutionAction      `json:"actionsTaken"`
 	Verification *agenticv1alpha1.ExecutionVerification `json:"verification,omitempty"`
 }

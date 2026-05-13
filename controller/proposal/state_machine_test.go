@@ -752,10 +752,10 @@ func TestPolicyCombinations_FullLifecycle(t *testing.T) {
 	M := agenticv1alpha1.ApprovalModeManual
 
 	tests := []struct {
-		name       string
-		analysis   agenticv1alpha1.ApprovalMode
-		execution  agenticv1alpha1.ApprovalMode
-		verify     agenticv1alpha1.ApprovalMode
+		name      string
+		analysis  agenticv1alpha1.ApprovalMode
+		execution agenticv1alpha1.ApprovalMode
+		verify    agenticv1alpha1.ApprovalMode
 	}{
 		{"AAA", A, A, A},
 		{"AAM", A, A, M},

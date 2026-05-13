@@ -17,7 +17,7 @@ type CreateOptions struct {
 	agent            string
 	request          string
 	targetNamespaces []string
-	output string
+	output           string
 
 	client    client.Client
 	namespace string
@@ -28,7 +28,7 @@ type CreateOptions struct {
 func NewCreateCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &CreateOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{

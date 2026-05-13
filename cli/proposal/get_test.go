@@ -21,7 +21,7 @@ func TestGet_BasicDetail(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -52,7 +52,7 @@ func TestGet_WithAnalysisResults(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -81,7 +81,7 @@ func TestGet_WithExecutionResults(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -110,7 +110,7 @@ func TestGet_WithVerificationResults(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -137,7 +137,7 @@ func TestGet_WithConditions(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -164,7 +164,7 @@ func TestGet_JSONOutput(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		output:    "json",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -183,7 +183,7 @@ func TestGet_NotFound(t *testing.T) {
 		client:    fc,
 		name:      "nonexistent",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {
@@ -210,7 +210,7 @@ func TestGet_StepStatusFromConditions(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -236,7 +236,7 @@ func TestGet_NoStepConditions(t *testing.T) {
 		client:    fc,
 		name:      "fix-crash",
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)

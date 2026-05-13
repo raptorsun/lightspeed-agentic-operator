@@ -1,0 +1,72 @@
+# lightspeed-agentic-operator
+
+Kubernetes controller for the agentic proposal workflow (`agentic.openshift.io/v1alpha1`): Proposal, ProposalApproval, Agent, LLMProvider, ApprovalPolicy, and related resources.
+
+- **How to work (agents)**: [`agent.md`](agent.md)
+- **Modules, directories, proposal phases, in-repo code conventions**: [`CLAUDE.md`](CLAUDE.md)
+- **Tests, manifests, Makefile, cluster workflow, `make api-lint`, CEL / `XValidation`**: this file
+
+## Development
+
+Run the manager against a cluster using the usual controller-runtime kubeconfig rules (`KUBECONFIG`, default kubeconfig path, or in-cluster as a pod). Auth plugins (OIDC, GCP, Azure, …) are registered via `k8s.io/client-go/plugin/pkg/client/auth`.
+
+### Agent Sandbox
+
+Reconciling proposals uses [kubernetes-sigs/agent-sandbox](https://github.com/kubernetes-sigs/agent-sandbox) (`SandboxClaim`, `Sandbox`, `SandboxTemplate`). **`make run`** and **`make deploy`** both run **`install-agent-sandbox`** first: it only hits the network if the three Sandbox CRDs are missing (otherwise three cheap `kubectl get crd` calls). You can run **`make install-agent-sandbox`** alone to set **`AGENT_SANDBOX_VERSION`** without a full **`make run`**.
+
+```bash
+make install-agent-sandbox   # optional; also run automatically before make run / make deploy
+# Override release: make install-agent-sandbox AGENT_SANDBOX_VERSION=v0.4.5
+```
+
+Upstream install details: [Agent Sandbox installation](https://agent-sandbox.sigs.k8s.io/docs/getting_started/install_prerequisites/). The Makefile target applies **`manifest.yaml`** and **`extensions.yaml`** for **`AGENT_SANDBOX_VERSION`** (default pinned in the Makefile). You still need a **`SandboxTemplate`** named like **`TEMPLATE_NAME`** (default `lightspeed-agent`) in **`OPERATOR_NAMESPACE`** — usually from Lightspeed / your platform, not from this target.
+
+### CRDs and manifests
+
+Do not edit **`config/crd/bases/`** or generated **`config/rbac/role.yaml`** by hand. After changing **`api/v1alpha1/`** types or kubebuilder markers, run **`make manifests`**.
+
+### Makefile defaults
+
+**`OPERATOR_NAMESPACE`** defaults to **`default`**: used for **`make run`** (`--namespace`), and for **`make deploy`** / **`make undeploy`** (Namespace, Deployment, ServiceAccount, RBAC subject namespace). Manifests under `config/` use **`__OPERATOR_NAMESPACE__`**; the Makefile substitutes **`$(OPERATOR_NAMESPACE)`** before `kustomize build`. Local **`make run`** uses metrics **`:18080`** and health **`:18081`** by default; override with **`METRICS_BIND_ADDRESS`** and **`HEALTH_PROBE_BIND_ADDRESS`** if needed.
+
+### Common targets
+
+```bash
+make manifests # controller-gen → config/crd/bases + config/rbac/role.yaml
+make test      # fmt + vet + go test (root + api module)
+make install   # kubectl apply CRDs from config/crd only
+make run       # install + install-agent-sandbox + vet + go run ./cmd/main.go
+make uninstall # kubectl delete CRDs from config/crd (optional: ignore-not-found=true)
+
+make deploy         # apply only; IMG must be pullable (CI / released image)
+make deploy-local   # OpenShift (see Makefile)
+make undeploy       # same layout | kubectl delete (optional: ignore-not-found=true)
+make api-lint       # Kube API linter on api/ (golangci-lint custom + plugin; see below)
+```
+
+### Testing
+
+**`make test`** runs **`fmt`**, **`vet`**, **`go test ./... -count=1`**, and **`cd api && GOWORK=off go test ./... -count=1`** (the API tree is a separate module; **`GOWORK=off`** avoids a repo-root **`go.work`** hijacking module choice). For noisy debugging: **`go test ./controller/proposal/... -v`**, **`go test ./api/... -v`**, **`go test ./cli/... -v`**.
+
+### API lint (Kube API linter)
+
+**`make api-lint`** runs **`golangci-lint custom`** (builds **`bin/golangci-lint-kube-api-linter`** from **`.custom-gcl.yml`**), then the plugin against **`api/`** with **`GOWORK=off`** and **`.golangci-kal.yml`**. Requires **`golangci-lint`** on **`PATH`**.
+
+### CEL validation (`XValidation`)
+
+kubebuilder **`+kubebuilder:validation:XValidation`** markers become CEL rules in generated CRD YAML (**`make manifests`**).
+
+- **`omitempty` fields**: they are absent from the stored object when unset. CEL must use **`has(field)`** before reading them, or validation fails with *no such key*. Example: **`has(old.denied) && old.denied`** instead of **`old.denied`** alone.
+- **Marker placement**: struct-level **`XValidation`** can produce double-quoted strings in generated YAML. Put **`XValidation`** on the **field** in the parent struct, not on the nested type.
+
+### `deploy`
+
+**`kustomize build | kubectl apply`**. **`IMG`** is the image reference the Deployment uses; the image must already exist on the cluster.
+
+### `deploy-local` (OpenShift)
+
+**`make deploy-local`** — build, push to the cluster registry, and deploy the operator (**`oc`** and a push-capable registry required). Details live in the **`deploy-local`** recipe in the **`Makefile`**.
+
+### `docker-build`
+
+**`$(CONTAINER_TOOL) build -t $(IMG) .`** — see **`Dockerfile`**.

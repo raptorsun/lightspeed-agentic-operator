@@ -24,7 +24,7 @@ func TestList_InNamespace(t *testing.T) {
 	o := &ListOptions{
 		client:    fc,
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -50,7 +50,7 @@ func TestList_AllNamespaces(t *testing.T) {
 	o := &ListOptions{
 		client:        fc,
 		allNamespaces: true,
-		IOStreams:      streams,
+		IOStreams:     streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -77,7 +77,7 @@ func TestList_FilterByPhase(t *testing.T) {
 		client:    fc,
 		namespace: "default",
 		phase:     "Analyzing",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -99,7 +99,7 @@ func TestList_Empty(t *testing.T) {
 	o := &ListOptions{
 		client:    fc,
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -121,7 +121,7 @@ func TestList_JSONOutput(t *testing.T) {
 		client:    fc,
 		namespace: "default",
 		output:    "json",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -143,7 +143,7 @@ func TestList_WideOutput(t *testing.T) {
 		client:    fc,
 		namespace: "default",
 		output:    "wide",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -170,7 +170,7 @@ func TestList_SortNewestFirst(t *testing.T) {
 	o := &ListOptions{
 		client:    fc,
 		namespace: "default",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -213,7 +213,7 @@ func TestList_EmptyAllNamespaces(t *testing.T) {
 	o := &ListOptions{
 		client:        fc,
 		allNamespaces: true,
-		IOStreams:      streams,
+		IOStreams:     streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -235,7 +235,7 @@ func TestList_YAMLOutput(t *testing.T) {
 		client:    fc,
 		namespace: "default",
 		output:    "yaml",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -258,7 +258,7 @@ func TestList_NamespaceFiltering(t *testing.T) {
 	o := &ListOptions{
 		client:    fc,
 		namespace: "wrong-ns",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)

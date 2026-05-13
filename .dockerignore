@@ -1,0 +1,11 @@
+.git
+.idea
+.cursor
+bin
+examples
+docs
+*.md
+.golangci*.yml
+.custom-gcl.yml
+config
+cli

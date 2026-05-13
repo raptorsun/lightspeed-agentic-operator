@@ -31,7 +31,7 @@ type LogsOptions struct {
 func NewLogsCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &LogsOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{

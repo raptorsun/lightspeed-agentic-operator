@@ -26,7 +26,7 @@ type ListOptions struct {
 func NewListCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &ListOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{

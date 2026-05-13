@@ -23,7 +23,6 @@ func TestCreateIdempotent_StatusFieldsWritten(t *testing.T) {
 		},
 		Spec: agenticv1alpha1.AnalysisResultSpec{
 			ProposalName: "test-proposal",
-
 		},
 		Status: agenticv1alpha1.AnalysisResultStatus{
 			Conditions: []metav1.Condition{
@@ -79,7 +78,6 @@ func TestCreateIdempotent_AlreadyExists(t *testing.T) {
 		},
 		Spec: agenticv1alpha1.AnalysisResultSpec{
 			ProposalName: "test-proposal",
-
 		},
 	}
 
@@ -94,7 +92,6 @@ func TestCreateIdempotent_AlreadyExists(t *testing.T) {
 		},
 		Spec: agenticv1alpha1.AnalysisResultSpec{
 			ProposalName: "test-proposal",
-
 		},
 		Status: agenticv1alpha1.AnalysisResultStatus{
 			Options: []agenticv1alpha1.RemediationOption{
@@ -131,7 +128,7 @@ func TestCreateIdempotent_ExecutionResult(t *testing.T) {
 		Spec: agenticv1alpha1.ExecutionResultSpec{
 			ProposalName: "test-proposal",
 
-			RetryIndex:   &retryIdx,
+			RetryIndex: &retryIdx,
 		},
 		Status: agenticv1alpha1.ExecutionResultStatus{
 			Conditions: []metav1.Condition{

@@ -53,10 +53,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## This repository
 
-This repo is the **Agentic Operator**: a Kubernetes controller for the agentic proposal workflow (`agentic.openshift.io/v1alpha1`). **All project mechanics live in `CLAUDE.md`** — module layout, key directories, how to run tests and API lint, CRD generation in `lightspeed-operator`, CEL/`XValidation` gotchas, proposal phases (`DerivePhase`), and code conventions. Prefer updating `CLAUDE.md` when those facts change.
-
-This file (`agent.md`) is the **process and scope** layer; avoid duplicating `CLAUDE.md` sections here so nothing drifts.
+**Behavior and scope** live in this file. **Architecture** → **`CLAUDE.md`**. **Commands and cluster workflow** → **`README.md`**. Edit those sources; do not duplicate them here.
 
 ### Cursor
 
-Optional repo skills live under `.cursor/skills/` (e.g. Go and test review).
+Optional repo skills under **`.cursor/skills/`** (e.g. Go / test review).
