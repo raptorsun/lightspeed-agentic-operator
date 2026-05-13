@@ -21,13 +21,13 @@ type analysisResponse struct {
 }
 
 type executionResponse struct {
-	Success      bool                                  `json:"success"`
+	Success      bool                                   `json:"success"`
 	ActionsTaken []agenticv1alpha1.ExecutionAction      `json:"actionsTaken"`
 	Verification *agenticv1alpha1.ExecutionVerification `json:"verification,omitempty"`
 }
 
 type verificationResponse struct {
-	Success bool                         `json:"success"`
+	Success bool                          `json:"success"`
 	Checks  []agenticv1alpha1.VerifyCheck `json:"checks"`
 	Summary string                        `json:"summary"`
 }

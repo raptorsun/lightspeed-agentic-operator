@@ -32,7 +32,7 @@ type ApproveOptions struct {
 func NewApproveCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &ApproveOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{

@@ -25,7 +25,7 @@ type DenyOptions struct {
 func NewDenyCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &DenyOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{
@@ -135,4 +135,3 @@ func (o *DenyOptions) nextPendingStage(p *agenticv1alpha1.Proposal, approval *ag
 	}
 	return ""
 }
-

@@ -24,7 +24,7 @@ type DeleteOptions struct {
 func NewDeleteCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	o := &DeleteOptions{
 		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:    streams,
+		IOStreams:   streams,
 	}
 
 	cmd := &cobra.Command{

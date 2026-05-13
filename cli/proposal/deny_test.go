@@ -26,7 +26,7 @@ func TestDeny_ExplicitStage(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "execution",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -107,7 +107,7 @@ func TestDeny_AlreadyDenied(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {
@@ -138,7 +138,7 @@ func TestDeny_AlreadyApprovedCannotDeny(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {
@@ -190,7 +190,7 @@ func TestDeny_NotFound(t *testing.T) {
 		name:      "nonexistent",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {

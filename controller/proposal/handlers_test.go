@@ -891,7 +891,7 @@ func TestFullLifecycle_WithSandboxAgent(t *testing.T) {
 
 	verificationJSON, _ := json.Marshal(verificationResponse{
 		Success: true,
-		Checks:  []agenticv1alpha1.VerifyCheck{{
+		Checks: []agenticv1alpha1.VerifyCheck{{
 			Name:   "pod-running",
 			Source: "oc",
 			Value:  "Running",

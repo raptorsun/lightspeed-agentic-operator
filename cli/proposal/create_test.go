@@ -18,7 +18,7 @@ func TestCreate_Success(t *testing.T) {
 		namespace: "default",
 		agent:     "default",
 		request:   "Pod crashing",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -62,7 +62,7 @@ func TestCreate_WithTargetNamespaces(t *testing.T) {
 		agent:            "smart",
 		request:          "Pod crashing",
 		targetNamespaces: []string{"prod", "staging"},
-		IOStreams:         streams,
+		IOStreams:        streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -83,11 +83,11 @@ func TestCreate_JSONOutput(t *testing.T) {
 	fc := fake.NewClientBuilder().WithScheme(testScheme()).Build()
 
 	o := &CreateOptions{
-		client:      fc,
-		namespace:   "default",
-		agent:       "smart",
-		request:     "Pod crashing",
-		output:      "json",
+		client:    fc,
+		namespace: "default",
+		agent:     "smart",
+		request:   "Pod crashing",
+		output:    "json",
 		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
@@ -141,10 +141,10 @@ func TestCreate_InlineAnalysisAgent(t *testing.T) {
 	fc := fake.NewClientBuilder().WithScheme(testScheme()).Build()
 
 	o := &CreateOptions{
-		client:      fc,
-		namespace:   "default",
-		agent:       "smart",
-		request:     "test",
+		client:    fc,
+		namespace: "default",
+		agent:     "smart",
+		request:   "test",
 		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {

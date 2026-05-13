@@ -36,20 +36,20 @@ const (
 
 	LabelManaged      = "agentic.openshift.io/managed"
 	LabelBaseTemplate = "agentic.openshift.io/base-template"
-	LabelStep        = "agentic.openshift.io/step"
+	LabelStep         = "agentic.openshift.io/step"
 	LabelAgent        = "agentic.openshift.io/agent"
 	LabelProposal     = "agentic.openshift.io/proposal"
 	LabelComponent    = "agentic.openshift.io/component"
 )
 
 type templateHashInput struct {
-	LLM                    agenticv1alpha1.LLMProviderSpec     `json:"llm"`
-	Model                  string                              `json:"model"`
-	Skills                 []agenticv1alpha1.SkillsSource      `json:"skills"`
-	MCPServers             []agenticv1alpha1.MCPServerConfig   `json:"mcpServers,omitempty"`
-	RequiredSecrets        []agenticv1alpha1.SecretRequirement `json:"requiredSecrets,omitempty"`
-	Step                   string                              `json:"step"`
-	BaseResourceVersion    string                              `json:"baseRV"`
+	LLM                 agenticv1alpha1.LLMProviderSpec     `json:"llm"`
+	Model               string                              `json:"model"`
+	Skills              []agenticv1alpha1.SkillsSource      `json:"skills"`
+	MCPServers          []agenticv1alpha1.MCPServerConfig   `json:"mcpServers,omitempty"`
+	RequiredSecrets     []agenticv1alpha1.SecretRequirement `json:"requiredSecrets,omitempty"`
+	Step                string                              `json:"step"`
+	BaseResourceVersion string                              `json:"baseRV"`
 }
 
 func computeTemplateHash(
@@ -67,7 +67,7 @@ func computeTemplateHash(
 		Skills:              skills,
 		MCPServers:          mcpServers,
 		RequiredSecrets:     requiredSecrets,
-		Step: step,
+		Step:                step,
 		BaseResourceVersion: baseResourceVersion,
 	}
 	data, err := json.Marshal(input)
@@ -346,7 +346,7 @@ func gcOldTemplates(
 	sel := labels.SelectorFromSet(labels.Set{
 		LabelManaged: "true",
 		LabelAgent:   agentName,
-		LabelStep: step,
+		LabelStep:    step,
 	})
 
 	list := &unstructured.UnstructuredList{}

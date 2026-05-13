@@ -103,7 +103,7 @@ func (s *StubAgentCaller) ReleaseSandboxes(_ context.Context, _ *agenticv1alpha1
 func (s *StubAgentCaller) Verify(_ context.Context, _ *agenticv1alpha1.Proposal, _ resolvedStep, _ *agenticv1alpha1.RemediationOption, _ *ExecutionOutput) (*VerificationOutput, error) {
 	return &VerificationOutput{
 		Success: true,
-		Checks:  []agenticv1alpha1.VerifyCheck{{
+		Checks: []agenticv1alpha1.VerifyCheck{{
 			Name:   "stub-check",
 			Source: "stub",
 			Value:  "ok",

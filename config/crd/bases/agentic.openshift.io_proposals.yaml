@@ -448,6 +448,42 @@ spec:
                         x-kubernetes-list-type: map
                     type: object
                 type: object
+              analysisOutput:
+                description: |-
+                  analysisOutput configures the analysis step's structured output.
+                  The mode field controls which built-in properties are included
+                  (Default: all; Minimal: only title). The schema field optionally
+                  defines adapter-specific structured data injected as "components".
+
+                  When omitted, the analysis uses the full default schema with all
+                  built-in properties and no custom components.
+
+                  Immutable: the output contract is fixed at creation.
+                minProperties: 1
+                properties:
+                  mode:
+                    default: Default
+                    description: |-
+                      mode controls which built-in properties the analysis output schema
+                      includes. Default includes all built-in properties (diagnosis,
+                      proposal, summary, rbac, verification). Minimal includes only the
+                      base structure (options array with title per option). Omit or set
+                      to "Default" for standard remediation workflows.
+                    enum:
+                    - Default
+                    - Minimal
+                    type: string
+                  schema:
+                    description: |-
+                      schema is a JSON Schema injected as a required "components"
+                      property in each analysis output option. Use this to require
+                      adapter-specific structured data beyond the base analysis schema.
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+                x-kubernetes-validations:
+                - message: schema is required when mode is Minimal
+                  rule: self.mode != 'Minimal' || has(self.schema)
               execution:
                 description: |-
                   execution defines per-step configuration for the execution step.
@@ -832,16 +868,6 @@ spec:
                         x-kubernetes-list-type: map
                     type: object
                 type: object
-              outputSchema:
-                description: |-
-                  outputSchema is a JSON Schema injected as a required "components"
-                  property in the analysis output. Use this to require adapter-specific
-                  structured data beyond the base analysis schema (diagnosis, proposal,
-                  RBAC, verification plan).
-
-                  Immutable: the output contract is fixed at creation.
-                type: object
-                x-kubernetes-preserve-unknown-fields: true
               request:
                 description: |-
                   request is the user's original request, alert description, or a
@@ -1653,9 +1679,13 @@ spec:
             - message: targetNamespaces is immutable once set
               rule: '!has(oldSelf.targetNamespaces) || (has(self.targetNamespaces)
                 && self.targetNamespaces == oldSelf.targetNamespaces)'
-            - message: outputSchema is immutable once set
-              rule: '!has(oldSelf.outputSchema) || (has(self.outputSchema) && self.outputSchema
-                == oldSelf.outputSchema)'
+            - message: analysisOutput is immutable once set
+              rule: '!has(oldSelf.analysisOutput) || (has(self.analysisOutput) &&
+                self.analysisOutput == oldSelf.analysisOutput)'
+            - message: analysisOutput mode Minimal is only allowed for analysis-only
+                proposals (no execution or verification steps)
+              rule: '!has(self.analysisOutput) || self.analysisOutput.mode != ''Minimal''
+                || (!has(self.execution) && !has(self.verification))'
             - message: tools is immutable once set
               rule: '!has(oldSelf.tools) || (has(self.tools) && self.tools == oldSelf.tools)'
             - message: analysis is immutable once set

@@ -26,7 +26,7 @@ func TestApprove_AnalysisStage(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -71,7 +71,7 @@ func TestApprove_ExecutionWithOption(t *testing.T) {
 		namespace: "default",
 		stage:     "execution",
 		option:    1,
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -112,7 +112,7 @@ func TestApprove_ExecutionWithAgent(t *testing.T) {
 		namespace: "default",
 		stage:     "execution",
 		agent:     "fast",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -144,7 +144,7 @@ func TestApprove_AllStages(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		all:       true,
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -190,7 +190,7 @@ func TestApprove_AlreadyApproved(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {
@@ -221,7 +221,7 @@ func TestApprove_AlreadyDenied(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {
@@ -244,7 +244,7 @@ func TestApprove_CreatesApprovalIfMissing(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	if err := o.Run(context.Background()); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -273,7 +273,7 @@ func TestApprove_NotFound(t *testing.T) {
 		name:      "nonexistent",
 		namespace: "default",
 		stage:     "analysis",
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {
@@ -363,7 +363,7 @@ func TestApprove_AllNoPending(t *testing.T) {
 		name:      "fix-crash",
 		namespace: "default",
 		all:       true,
-		IOStreams:  streams,
+		IOStreams: streams,
 	}
 	err := o.Run(context.Background())
 	if err == nil {

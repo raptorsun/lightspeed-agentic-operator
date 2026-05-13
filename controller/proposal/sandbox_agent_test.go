@@ -40,11 +40,11 @@ func (m *mockSandboxProvider) Release(_ context.Context, _ string) error {
 }
 
 type mockHTTPClient struct {
-	response  *agentRunResponse
-	err       error
-	lastQuery string
+	response   *agentRunResponse
+	err        error
+	lastQuery  string
 	lastPrompt string
-	lastCtx   *agentContext
+	lastCtx    *agentContext
 }
 
 func (m *mockHTTPClient) Run(_ context.Context, systemPrompt, query string, _ json.RawMessage, agentCtx *agentContext) (*agentRunResponse, error) {
@@ -678,7 +678,7 @@ func TestReleaseSandboxes_SkipsEmptyClaims(t *testing.T) {
 func TestReleaseSandboxes_ContinuesOnError(t *testing.T) {
 	releasedClaims := []string{}
 	tracker := &trackingMockSandbox{
-		released: &releasedClaims,
+		released:   &releasedClaims,
 		errOnClaim: "claim-execution",
 	}
 
