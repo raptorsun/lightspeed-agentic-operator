@@ -9,6 +9,10 @@
 *~
 .DS_Store
 
+# Go workspaces (local dev only — go.mod stays clean for external consumers)
+go.work
+go.work.sum
+
 # Go
 *.exe
 *.exe~
