@@ -84,3 +84,4 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
 )
 
+replace github.com/openshift/lightspeed-agentic-operator/api => ./api
