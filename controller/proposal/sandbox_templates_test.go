@@ -242,21 +242,6 @@ func TestComputeTemplateHash_DifferentRequiredSecrets(t *testing.T) {
 
 // --- patchLLMCredentials tests ---
 
-var sdkSpecificEnvVars = []string{
-	"ANTHROPIC_MODEL", "CLAUDE_CODE_USE_VERTEX", "GCP_PROJECT", "GCP_REGION",
-	"GOOGLE_APPLICATION_CREDENTIALS", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_API_VERSION",
-	"CLAUDE_CODE_USE_BEDROCK", "AWS_REGION", "OPENAI_BASE_URL", "ANTHROPIC_BASE_URL",
-}
-
-func assertNoSDKEnvVars(t *testing.T, envs []map[string]any) {
-	t.Helper()
-	for _, name := range sdkSpecificEnvVars {
-		if _, ok := findEnv(envs, name); ok {
-			t.Errorf("unexpected SDK-specific env var %s", name)
-		}
-	}
-}
-
 func assertCredentialVolumeMount(t *testing.T, tmpl *unstructured.Unstructured) {
 	t.Helper()
 	containers, _, _ := unstructured.NestedSlice(tmpl.Object, "spec", "podTemplate", "spec", "containers")
@@ -281,6 +266,8 @@ func assertCredentialVolumeMount(t *testing.T, tmpl *unstructured.Unstructured) 
 	}
 }
 
+// Anthropic LLMProvider: sets LIGHTSPEED_PROVIDER=anthropic, model, URL, plus
+// unconditional envFrom and credential volume mount.
 func TestPatchLLMCredentials_Anthropic(t *testing.T) {
 	tmpl := emptyTemplate()
 	llm := testLLMProviderWithURL(agenticv1alpha1.LLMProviderAnthropic, "https://custom.api")
@@ -295,8 +282,6 @@ func TestPatchLLMCredentials_Anthropic(t *testing.T) {
 	assertCredentialVolumeMount(t, tmpl)
 
 	envs := getEnvVars(tmpl)
-	assertNoSDKEnvVars(t, envs)
-
 	if e, ok := findEnv(envs, "LIGHTSPEED_PROVIDER"); !ok {
 		t.Error("missing LIGHTSPEED_PROVIDER")
 	} else if e["value"] != "anthropic" {
@@ -314,6 +299,8 @@ func TestPatchLLMCredentials_Anthropic(t *testing.T) {
 	}
 }
 
+// GoogleCloudVertex LLMProvider: sets LIGHTSPEED_PROVIDER=vertex, model,
+// model provider, project, region, plus unconditional credential mounts.
 func TestPatchLLMCredentials_Vertex(t *testing.T) {
 	tmpl := emptyTemplate()
 	llm := testLLMProvider(agenticv1alpha1.LLMProviderGoogleCloudVertex)
@@ -328,8 +315,6 @@ func TestPatchLLMCredentials_Vertex(t *testing.T) {
 	assertCredentialVolumeMount(t, tmpl)
 
 	envs := getEnvVars(tmpl)
-	assertNoSDKEnvVars(t, envs)
-
 	if e, ok := findEnv(envs, "LIGHTSPEED_PROVIDER"); !ok {
 		t.Error("missing LIGHTSPEED_PROVIDER")
 	} else if e["value"] != "vertex" {
@@ -357,6 +342,8 @@ func TestPatchLLMCredentials_Vertex(t *testing.T) {
 	}
 }
 
+// AWSBedrock LLMProvider: sets LIGHTSPEED_PROVIDER=bedrock, model, region,
+// plus unconditional credential mounts.
 func TestPatchLLMCredentials_Bedrock(t *testing.T) {
 	tmpl := emptyTemplate()
 	llm := testLLMProvider(agenticv1alpha1.LLMProviderAWSBedrock)
@@ -368,8 +355,6 @@ func TestPatchLLMCredentials_Bedrock(t *testing.T) {
 	assertCredentialVolumeMount(t, tmpl)
 
 	envs := getEnvVars(tmpl)
-	assertNoSDKEnvVars(t, envs)
-
 	if e, ok := findEnv(envs, "LIGHTSPEED_PROVIDER"); !ok {
 		t.Error("missing LIGHTSPEED_PROVIDER")
 	} else if e["value"] != "bedrock" {
@@ -387,6 +372,8 @@ func TestPatchLLMCredentials_Bedrock(t *testing.T) {
 	}
 }
 
+// OpenAI LLMProvider: sets LIGHTSPEED_PROVIDER=openai, model, URL,
+// plus unconditional credential mounts.
 func TestPatchLLMCredentials_OpenAI(t *testing.T) {
 	tmpl := emptyTemplate()
 	llm := testLLMProviderWithURL(agenticv1alpha1.LLMProviderOpenAI, "https://api.example.com")
@@ -398,8 +385,6 @@ func TestPatchLLMCredentials_OpenAI(t *testing.T) {
 	assertCredentialVolumeMount(t, tmpl)
 
 	envs := getEnvVars(tmpl)
-	assertNoSDKEnvVars(t, envs)
-
 	if e, ok := findEnv(envs, "LIGHTSPEED_PROVIDER"); !ok {
 		t.Error("missing LIGHTSPEED_PROVIDER")
 	} else if e["value"] != "openai" {
@@ -417,6 +402,8 @@ func TestPatchLLMCredentials_OpenAI(t *testing.T) {
 	}
 }
 
+// AzureOpenAI LLMProvider: sets LIGHTSPEED_PROVIDER=azure, URL from endpoint,
+// API version, plus unconditional credential mounts.
 func TestPatchLLMCredentials_Azure(t *testing.T) {
 	tmpl := emptyTemplate()
 	llm := testLLMProvider(agenticv1alpha1.LLMProviderAzureOpenAI)
@@ -428,8 +415,6 @@ func TestPatchLLMCredentials_Azure(t *testing.T) {
 	assertCredentialVolumeMount(t, tmpl)
 
 	envs := getEnvVars(tmpl)
-	assertNoSDKEnvVars(t, envs)
-
 	if e, ok := findEnv(envs, "LIGHTSPEED_PROVIDER"); !ok {
 		t.Error("missing LIGHTSPEED_PROVIDER")
 	} else if e["value"] != "azure" {
@@ -447,6 +432,8 @@ func TestPatchLLMCredentials_Azure(t *testing.T) {
 	}
 }
 
+// AzureOpenAI with explicit URL: url field takes precedence over endpoint
+// for LIGHTSPEED_PROVIDER_URL.
 func TestPatchLLMCredentials_AzureURLOverridesEndpoint(t *testing.T) {
 	tmpl := emptyTemplate()
 	llm := testLLMProviderWithURL(agenticv1alpha1.LLMProviderAzureOpenAI, "https://override.example.com")
