@@ -79,7 +79,7 @@ Audience: AI agents. Behavioral rules and phase semantics live in **what/** spec
 7. **Shared prelude:** `getApprovalPolicy` (cluster singleton name `cluster`), `ensureProposalApproval`, `resolveProposal`. Resolution failure → set `ProposalConditionAnalyzed=False` with `reasonWorkflowFailed`, status patch, return (no requeue).
 8. **Phase switch:** Routes to `handleRevision` (if `needsRevision`) before analysis/execution/escalation arms; otherwise `handleAnalysis`, `handleExecution`, `handleVerification`, `handleEscalation`, or no-op.
 9. **Handlers** set step conditions (`Unknown` → agent call → `True`/`False`), create result CRs, append `Status.Steps.*.Results`, `statusPatch` proposal.
-10. **Agent path:** All agent steps go through `r.Agent.*` which (in production) is `SandboxAgentCaller`: template + `EnsureAgentTemplate` → `Sandbox.Claim` → early `patchSandboxInfo` on proposal → `WaitReady` → `AgentHTTPClient.Run` → JSON unmarshal into outputs.
+10. **Agent path:** All agent steps go through `r.Agent.*` which (in production) is `SandboxAgentCaller`: `callWithSandbox` calls `SetStep` on the provider → `Claim` (provider-specific: `SandboxManager.Claim` handles template derivation, `BarePodManager.Claim` builds pod directly) → `patchSandboxInfo` on proposal → `WaitReady` → normalize URL → `outputSchemaForStep` → `ClientFactory(endpoint).Run` → JSON unmarshal into outputs.
 
 ---
 
