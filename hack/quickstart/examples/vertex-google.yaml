@@ -4,7 +4,9 @@
 #   oc create secret generic llm-creds-vertex -n openshift-lightspeed \
 #     --from-file=GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/adc.json
 #
-# Then edit this file: replace <YOUR_GCP_PROJECT_ID> with your GCP project ID.
+# Then edit this file:
+#   - Replace <YOUR_GCP_PROJECT_ID> with your GCP project ID
+#   - Replace <YOUR_GCP_REGION> with your Vertex AI region (e.g. us-east5)
 apiVersion: agentic.openshift.io/v1alpha1
 kind: LLMProvider
 metadata:
@@ -13,7 +15,7 @@ spec:
   type: GoogleCloudVertex
   googleCloudVertex:
     projectID: "<YOUR_GCP_PROJECT_ID>"
-    region: "us-east5"
+    region: "<YOUR_GCP_REGION>"
     modelProvider: Google
     credentialsSecret:
       name: llm-creds-vertex

@@ -192,14 +192,14 @@ cat <<DONE
   oc create secret generic llm-creds-vertex -n ${NAMESPACE} \\
     --from-file=GOOGLE_APPLICATION_CREDENTIALS=/path/to/adc.json
   curl -sLO ${EXAMPLES_BASE}/vertex-anthropic.yaml
-  # Edit vertex-anthropic.yaml — set your GCP project ID
+  # Edit vertex-anthropic.yaml — set your GCP project ID and region
   oc apply -f vertex-anthropic.yaml
 
   ── Vertex AI / Gemini ─────────────────────────────────────
   oc create secret generic llm-creds-vertex -n ${NAMESPACE} \\
     --from-file=GOOGLE_APPLICATION_CREDENTIALS=/path/to/adc.json
   curl -sLO ${EXAMPLES_BASE}/vertex-google.yaml
-  # Edit vertex-google.yaml — set your GCP project ID
+  # Edit vertex-google.yaml — set your GCP project ID and region
   oc apply -f vertex-google.yaml
 
   ── OpenAI ─────────────────────────────────────────────────
