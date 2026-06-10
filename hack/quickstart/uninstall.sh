@@ -11,6 +11,18 @@ NAMESPACE="${NAMESPACE:-openshift-lightspeed}"
 
 info()  { echo "  ✓ $*"; }
 step()  { echo "[${1}] ${2}"; }
+fail()  { echo "  ✗ $*" >&2; exit 1; }
+
+if [ "${QUICKSTART_FORCE:-}" != "1" ]; then
+  echo "This will delete ALL Agentic OLS resources in namespace ${NAMESPACE}"
+  echo "and remove the operator CRDs cluster-wide."
+  echo ""
+  read -rp "Continue? [y/N] " confirm
+  case "${confirm}" in
+    [yY][eE][sS]|[yY]) ;;
+    *) echo "Aborted."; exit 0 ;;
+  esac
+fi
 
 # --- Step 1: Delete CRs ------------------------------------------------------
 

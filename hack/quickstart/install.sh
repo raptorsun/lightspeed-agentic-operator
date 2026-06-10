@@ -65,7 +65,13 @@ info "${#CRD_FILES[@]} CRDs applied"
 
 step "3/5" "Deploying operator to ${NAMESPACE} (sandbox-mode=${SANDBOX_MODE})..."
 
-oc create namespace "${NAMESPACE}" 2>/dev/null && info "Namespace created" || info "Namespace already exists"
+if oc create namespace "${NAMESPACE}" 2>/dev/null; then
+  info "Namespace created"
+elif oc get namespace "${NAMESPACE}" >/dev/null 2>&1; then
+  info "Namespace already exists"
+else
+  fail "Failed to create namespace ${NAMESPACE}"
+fi
 
 oc apply -f - <<EOF
 apiVersion: v1
@@ -103,6 +109,8 @@ spec:
         app: lightspeed-agentic-operator
     spec:
       serviceAccountName: lightspeed-agentic-operator
+      securityContext:
+        runAsNonRoot: true
       containers:
       - name: manager
         image: ${OPERATOR_IMAGE}
@@ -129,6 +137,19 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         env:
         - name: POD_NAMESPACE
           valueFrom:
