@@ -11,12 +11,16 @@
 #   - oc CLI on PATH
 #   - Logged into the target OpenShift cluster
 #   - cluster-admin privileges
+#
+# Note: The console plugin requires OpenShift 4.21+.
+#       Set CONSOLE_IMAGE="" to skip console deployment on older clusters.
 
 set -euo pipefail
 
 NAMESPACE="${NAMESPACE:-openshift-lightspeed}"
 OPERATOR_IMAGE="${OPERATOR_IMAGE:-quay.io/redhat-user-workloads/crt-nshift-lightspeed-tenant/lightspeed-agentic-operator:main}"
 SANDBOX_IMAGE="${SANDBOX_IMAGE:-quay.io/redhat-user-workloads/crt-nshift-lightspeed-tenant/lightspeed-agentic-sandbox:main}"
+CONSOLE_IMAGE="${CONSOLE_IMAGE:-quay.io/redhat-user-workloads/crt-nshift-lightspeed-tenant/lightspeed-agentic-console:main}"
 SANDBOX_MODE="${SANDBOX_MODE:-bare-pod}"
 
 GITHUB_RAW="https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main"
@@ -118,6 +122,7 @@ spec:
         - "--namespace=${NAMESPACE}"
         - "--sandbox-mode=${SANDBOX_MODE}"
         - "--agentic-sandbox-image=${SANDBOX_IMAGE}"
+        - "--agentic-console-image=${CONSOLE_IMAGE}"
         ports:
         - name: metrics
           containerPort: 8080
@@ -201,10 +206,13 @@ cat <<DONE
 ════════════════════════════════════════════════════════════════
   Agentic OLS installed successfully!
 
-  Namespace:      ${NAMESPACE}
-  Sandbox mode:   ${SANDBOX_MODE}
+  Namespace     : ${NAMESPACE}
+  Sandbox mode  : ${SANDBOX_MODE}
   Operator image: ${OPERATOR_IMAGE}
-  Sandbox image:  ${SANDBOX_IMAGE}
+  Sandbox image : ${SANDBOX_IMAGE}
+  Console image : ${CONSOLE_IMAGE}
+
+  > Console works only on OpenShift 4.21+
 ════════════════════════════════════════════════════════════════
 
   NEXT: Configure your LLM provider. Pick one:
@@ -242,7 +250,7 @@ cat <<DONE
   # Check the analysis result:
   oc get analysisresult -n ${NAMESPACE} -o json
 
-  # Approve execution (option 0 = first option):
+  # Approve execution (option 0 = first option) via oc CLI or in console UI:
   oc patch proposalapproval namespace-inventory -n ${NAMESPACE} \\
     --type=json \\
     -p '[{"op":"add","path":"/spec/stages/-","value":{"type":"Execution","execution":{"option":0}}}]'
