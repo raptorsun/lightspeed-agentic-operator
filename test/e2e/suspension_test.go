@@ -17,6 +17,13 @@ func TestSuspension(t *testing.T) {
 	createFixtures(t, c)
 	ctx := context.Background()
 
+	config := &agenticv1alpha1.AgenticOLSConfig{
+		ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
+		Spec:       agenticv1alpha1.AgenticOLSConfigSpec{Suspended: true},
+	}
+	cleanup(t, c, config)
+	t.Cleanup(func() { cleanup(t, c, config) })
+
 	t.Run("suspend terminates in-flight proposal", func(t *testing.T) {
 		prop := createProposal(t, c, "suspend-inflight")
 
@@ -24,15 +31,9 @@ func TestSuspension(t *testing.T) {
 		waitForPhase(t, c, prop.Name, agenticv1alpha1.ProposalPhaseAnalyzing)
 
 		// Create AgenticOLSConfig with suspended=true.
-		config := &agenticv1alpha1.AgenticOLSConfig{
-			ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
-			Spec:       agenticv1alpha1.AgenticOLSConfigSpec{Suspended: true},
-		}
-		cleanup(t, c, config)
 		if err := c.Create(ctx, config); err != nil {
 			t.Fatalf("create AgenticOLSConfig: %v", err)
 		}
-		t.Cleanup(func() { cleanup(t, c, config) })
 
 		// Proposal should reach EmergencyStopped.
 		waitForPhase(t, c, prop.Name, agenticv1alpha1.ProposalPhaseEmergencyStopped)

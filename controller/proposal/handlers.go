@@ -466,9 +466,6 @@ func (r *ProposalReconciler) handleSuspension(
 	proposal *agenticv1alpha1.Proposal,
 ) (ctrl.Result, error) {
 	phase := agenticv1alpha1.DerivePhase(proposal.Status.Conditions)
-	if isTerminal(phase) {
-		return ctrl.Result{}, nil
-	}
 
 	log.Info("terminating proposal due to system suspension", "phase", phase)
 
@@ -482,6 +479,10 @@ func (r *ProposalReconciler) handleSuspension(
 		if err := cleanupExecutionRBAC(ctx, r.Client, proposal, r.Namespace); err != nil {
 			log.Error(err, "best-effort RBAC cleanup during suspension")
 		}
+	}
+
+	if isTerminal(phase) {
+		return ctrl.Result{}, nil
 	}
 
 	base := proposal.DeepCopy()
