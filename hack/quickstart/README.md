@@ -12,7 +12,7 @@ No building, no cloning required.
 ## Install
 
 ```bash
-curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/install.sh | bash
+bash <(curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/install.sh)
 ```
 
 The script installs CRDs, deploys the operator, and creates an ApprovalPolicy.
@@ -22,7 +22,7 @@ submitting a test proposal.
 ## Uninstall
 
 ```bash
-curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/uninstall.sh | bash
+bash <(curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/uninstall.sh)
 ```
 
 Skip the confirmation prompt with `QUICKSTART_FORCE=1`.
@@ -34,14 +34,13 @@ Skip the confirmation prompt with `QUICKSTART_FORCE=1`.
 | `NAMESPACE` | `openshift-lightspeed` | Target namespace |
 | `OPERATOR_IMAGE` | Konflux `:main` | Operator container image |
 | `SANDBOX_IMAGE` | Konflux `:main` | Agent sandbox container image |
-| `CONSOLE_IMAGE` | Konflux `:main` | Console plugin container image (requires OCP 4.21+; set `""` to skip) |
 | `SANDBOX_MODE` | `bare-pod` | Sandbox mode (`bare-pod` or `sandbox-claim`) |
 
 Example with overrides:
 
 ```bash
 NAMESPACE=my-ns SANDBOX_MODE=sandbox-claim \
-  curl -sL .../install.sh | bash
+  bash <(curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/install.sh)
 ```
 
 ## LLM Provider Examples

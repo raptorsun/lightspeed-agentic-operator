@@ -5,7 +5,7 @@
 # pre-built Konflux images. No building, no cloning.
 #
 # Usage:
-#   curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/install.sh | bash
+#   bash <(curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/install.sh)
 #
 # Prerequisites:
 #   - oc CLI on PATH
@@ -259,6 +259,6 @@ cat <<DONE
   oc get proposals -n ${NAMESPACE} -w
 
   ── To uninstall ───────────────────────────────────────────
-  curl -sL ${GITHUB_RAW}/hack/quickstart/uninstall.sh | bash
+  bash <(curl -sL ${GITHUB_RAW}/hack/quickstart/uninstall.sh)
 
 DONE
