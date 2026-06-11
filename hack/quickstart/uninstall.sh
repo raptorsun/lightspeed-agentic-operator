@@ -17,7 +17,14 @@ if [ "${QUICKSTART_FORCE:-}" != "1" ]; then
   echo "This will delete ALL Agentic OLS resources in namespace ${NAMESPACE}"
   echo "and remove the operator CRDs cluster-wide."
   echo ""
-  read -rp "Continue? [y/N] " confirm </dev/tty
+  if [ -t 0 ]; then
+    read -rp "Continue? [y/N] " confirm
+  elif [ -e /dev/tty ]; then
+    read -rp "Continue? [y/N] " confirm </dev/tty
+  else
+    echo "Non-interactive shell detected. Set QUICKSTART_FORCE=1 to proceed."
+    exit 1
+  fi
   case "${confirm}" in
     [yY][eE][sS]|[yY]) ;;
     *) echo "Aborted."; exit 0 ;;
