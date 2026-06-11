@@ -3,7 +3,7 @@
 # Uninstall Agentic OLS quickstart deployment.
 #
 # Usage:
-#   curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/uninstall.sh | bash
+#   bash <(curl -sL https://raw.githubusercontent.com/openshift/lightspeed-agentic-operator/main/hack/quickstart/uninstall.sh)
 
 set -euo pipefail
 
