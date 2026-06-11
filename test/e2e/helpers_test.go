@@ -23,7 +23,7 @@ import (
 const (
 	pollInterval = 2 * time.Second
 	pollTimeout  = 10 * time.Minute
-	testNS       = "default"
+	testNS       = "openshift-lightspeed"
 )
 
 // --- Client ---
