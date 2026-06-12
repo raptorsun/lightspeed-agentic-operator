@@ -276,10 +276,15 @@ cat <<DONE
   curl -sLO ${EXAMPLES_BASE}/openai.yaml
   oc apply -f openai.yaml
 
-  ── Then submit example proposal ───────────────────────────
+  ── Then submit an example proposal ────────────────────────
   curl -sLO ${EXAMPLES_BASE}/namespace-inventory.yaml
-  # Edit namespace-inventory.yaml if NAMESPACE is not openshift-lightspeed
+  curl -sLO ${EXAMPLES_BASE}/deploy-test-workload.yaml
+
+  # Investigate namespace workloads, remediate if issues found:
   oc apply -f namespace-inventory.yaml
+
+  # Deploy a test workload (analysis + execution):
+  oc apply -f deploy-test-workload.yaml
 
   # Watch until analysis completes (Analyzed=True):
   oc get proposals -n ${NAMESPACE} -w
