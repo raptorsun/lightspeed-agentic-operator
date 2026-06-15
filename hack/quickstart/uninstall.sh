@@ -14,8 +14,8 @@ step()  { echo "[${1}] ${2}"; }
 fail()  { echo "  ✗ $*" >&2; exit 1; }
 
 if [ "${QUICKSTART_FORCE:-}" != "1" ]; then
-  echo "This will delete ALL Agentic OLS resources in namespace ${NAMESPACE}"
-  echo ", remove the operator CRDs cluster-wide and the namespace itself."
+  echo "This will delete ALL Agentic OLS resources in namespace ${NAMESPACE},"
+  echo "remove the console plugin, operator CRDs cluster-wide, and the namespace itself."
   echo ""
   read -rp "Continue? [y/N] " confirm
   case "${confirm}" in
@@ -26,7 +26,7 @@ fi
 
 # --- Step 1: Delete CRs ------------------------------------------------------
 
-step "1/5" "Deleting custom resources..."
+step "1/6" "Deleting custom resources..."
 
 for kind in proposals proposalapprovals analysisresults executionresults verificationresults escalationresults; do
   oc delete "${kind}" --all -n "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
@@ -36,20 +36,46 @@ info "Proposal resources deleted"
 oc delete agents --all --ignore-not-found 2>/dev/null || true
 oc delete llmproviders --all --ignore-not-found 2>/dev/null || true
 oc delete approvalpolicy cluster --ignore-not-found 2>/dev/null || true
-info "Agents, LLMProviders, ApprovalPolicy deleted"
+oc delete agenticolsconfig cluster --ignore-not-found 2>/dev/null || true
+info "Agents, LLMProviders, ApprovalPolicy, AgenticOLSConfig deleted"
 
 # --- Step 2: Delete secrets ---------------------------------------------------
 
-step "2/5" "Deleting credential secrets..."
+step "2/6" "Deleting credential secrets..."
 
 for secret in llm-creds-vertex llm-creds-openai llm-creds-azure llm-creds-bedrock llm-creds-anthropic; do
   oc delete secret "${secret}" -n "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
 done
 info "Credential secrets deleted"
 
-# --- Step 3: Delete operator --------------------------------------------------
+# --- Step 3: Remove console plugin --------------------------------------------
 
-step "3/5" "Deleting operator deployment..."
+step "3/6" "Removing console plugin..."
+
+PLUGIN_NAME="lightspeed-agentic-console-plugin"
+
+if oc get consoleplugin "${PLUGIN_NAME}" >/dev/null 2>&1; then
+  plugin_idx="$(
+    oc get console.operator.openshift.io cluster -o json 2>/dev/null \
+      | python3 -c "import sys,json; p=json.load(sys.stdin).get('spec',{}).get('plugins',[]); print(p.index('${PLUGIN_NAME}') if '${PLUGIN_NAME}' in p else '')" 2>/dev/null
+  )"
+
+  if [ -n "${plugin_idx}" ] && oc patch console.operator.openshift.io cluster --type=json \
+    -p "[{\"op\":\"remove\",\"path\":\"/spec/plugins/${plugin_idx}\"}]" >/dev/null 2>&1; then
+    info "Plugin deregistered from Console"
+  else
+    info "Plugin not registered in Console (or patch failed) — skipping deregistration"
+  fi
+
+  oc delete consoleplugin "${PLUGIN_NAME}" --ignore-not-found 2>/dev/null || true
+  info "ConsolePlugin CR deleted"
+else
+  info "Console plugin not found — skipping"
+fi
+
+# --- Step 4: Delete operator --------------------------------------------------
+
+step "4/6" "Deleting operator deployment..."
 
 oc delete deployment lightspeed-agentic-operator -n "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
 oc delete sa lightspeed-agentic-operator -n "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
@@ -58,11 +84,12 @@ oc delete clusterrolebinding lightspeed-agent-cluster-reader --ignore-not-found 
 oc delete clusterrolebinding lightspeed-agent-monitoring-view --ignore-not-found 2>/dev/null || true
 info "Operator removed"
 
-# --- Step 4: Delete CRDs -----------------------------------------------------
+# --- Step 5: Delete CRDs -----------------------------------------------------
 
-step "4/5" "Deleting Agentic Operator CRDs..."
+step "5/6" "Deleting Agentic Operator CRDs..."
 
 for crd in \
+  agenticolsconfigs.agentic.openshift.io \
   agents.agentic.openshift.io \
   analysisresults.agentic.openshift.io \
   approvalpolicies.agentic.openshift.io \
@@ -76,9 +103,9 @@ for crd in \
 done
 info "CRDs deleted"
 
-# --- Step 5: Delete namespace -------------------------------------------------
+# --- Step 6: Delete namespace -------------------------------------------------
 
-step "5/5" "Deleting namespace ${NAMESPACE}..."
+step "6/6" "Deleting namespace ${NAMESPACE}..."
 
 oc delete namespace "${NAMESPACE}" --ignore-not-found --timeout=60s 2>/dev/null || true
 info "Namespace deleted"

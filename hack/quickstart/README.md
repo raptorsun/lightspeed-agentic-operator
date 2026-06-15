@@ -63,7 +63,7 @@ The [`examples/`](examples/) directory contains LLMProvider + Agent templates:
 
 ## Example Proposal
 
-[`namespace-inventory.yaml`](examples/namespace-inventory.yaml) submits a
-proposal that analyzes workloads in the target namespace and proposes
-remediation with RBAC for an execution step. Execution requires manual
-approval via `ProposalApproval`.
+[`deploy-test-workload.yaml`](examples/deploy-test-workload.yaml) submits a
+proposal that analyzes the target namespace and deploys a test workload
+(nginx Deployment + Service). Execution requires manual approval via
+`ProposalApproval`.

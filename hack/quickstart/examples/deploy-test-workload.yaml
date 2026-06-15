@@ -1,0 +1,30 @@
+# Deploy a test workload — full analysis + execution lifecycle.
+#
+# Analysis inspects the target namespace, then proposes deploying
+# a lightweight test pod (nginx). Execution creates the Deployment
+# and Service. This gives a concrete, safe action for the execution
+# step to perform.
+#
+# Execution requires manual approval per the quickstart ApprovalPolicy.
+#
+# Prerequisites: LLM provider + default agent configured (see openai.yaml, etc.)
+apiVersion: agentic.openshift.io/v1alpha1
+kind: Proposal
+metadata:
+  name: deploy-test-workload
+  namespace: openshift-lightspeed
+spec:
+  request: |
+    Analyze the openshift-lightspeed namespace and deploy a test workload.
+
+    1. Analysis: List current workloads and confirm there is no Deployment
+       named "hello-test" already running.
+    2. Execution: Create a Deployment named "hello-test" running nginx:latest
+       with 1 replica, and a ClusterIP Service named "hello-test" on port 80.
+       Verify the pod reaches Running state.
+  targetNamespaces:
+    - openshift-lightspeed
+  analysis:
+    agent: default
+  execution:
+    agent: default
