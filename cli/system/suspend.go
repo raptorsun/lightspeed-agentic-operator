@@ -78,9 +78,9 @@ func (o *SuspendOptions) Run(ctx context.Context) error {
 			ObjectMeta: metav1.ObjectMeta{Name: configName},
 			Spec:       agenticv1alpha1.AgenticOLSConfigSpec{Suspended: true},
 		}
-		if err := o.client.Create(ctx, cfg); err != nil {
-			if !apierrors.IsAlreadyExists(err) {
-				return fmt.Errorf("failed to create AgenticOLSConfig: %w", err)
+		if createErr := o.client.Create(ctx, cfg); createErr != nil {
+			if !apierrors.IsAlreadyExists(createErr) {
+				return fmt.Errorf("failed to create AgenticOLSConfig: %w", createErr)
 			}
 			cfg, err = getConfig(ctx, o.client)
 			if err != nil {
