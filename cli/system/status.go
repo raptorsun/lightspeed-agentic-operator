@@ -72,7 +72,7 @@ func (o *StatusOptions) Run(ctx context.Context) error {
 	}
 
 	suspendedCond := meta.FindStatusCondition(cfg.Status.Conditions, agenticv1alpha1.AgenticOLSConfigConditionSuspended)
-	if cfg.Spec.Suspended && suspendedCond != nil {
+	if cfg.Spec.Suspended && suspendedCond != nil && suspendedCond.Status == metav1.ConditionTrue {
 		relative, absolute := formatConditionTimes(suspendedCond.LastTransitionTime, o.now())
 		fmt.Fprintf(o.Out, "Agentic System: SUSPENDED (since %s ago, %s, %s)\n",
 			relative, absolute, suspendedCond.Message)
