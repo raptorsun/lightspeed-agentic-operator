@@ -6,10 +6,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -21,10 +23,17 @@ import (
 	agenticv1alpha1 "github.com/openshift/lightspeed-agentic-operator/api/v1alpha1"
 )
 
-const (
-	pollInterval = 2 * time.Second
-	pollTimeout  = 10 * time.Minute
-)
+const pollInterval = 2 * time.Second
+
+var pollTimeout = func() time.Duration {
+	if v := os.Getenv("E2E_POLL_TIMEOUT"); v != "" {
+		d, err := time.ParseDuration(v)
+		if err == nil {
+			return d
+		}
+	}
+	return 10 * time.Minute
+}()
 
 var testNS = func() string {
 	if ns := os.Getenv("TEST_NAMESPACE"); ns != "" {
@@ -137,6 +146,11 @@ type e2eFixtures struct {
 // and registers cleanup. Cleans up leftovers from previous failed runs first.
 func createFixtures(t *testing.T, c client.Client) *e2eFixtures {
 	t.Helper()
+
+	if os.Getenv("E2E_PROVIDER") != "" {
+		return createRealProviderFixtures(t, c)
+	}
+
 	ctx := context.Background()
 
 	f := &e2eFixtures{
@@ -175,7 +189,9 @@ func createFixtures(t *testing.T, c client.Client) *e2eFixtures {
 
 	// Ensure target namespace exists (used by RBAC tests).
 	stagingNS := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "staging"}}
-	_ = c.Create(ctx, stagingNS) // ignore AlreadyExists
+	if err := c.Create(ctx, stagingNS); err != nil && !apierrors.IsAlreadyExists(err) {
+		t.Fatalf("create staging namespace: %v", err)
+	}
 
 	all := []client.Object{f.LLM, f.Agent, f.Policy, f.LLMSecret}
 	cleanup(t, c, all...)
@@ -187,6 +203,120 @@ func createFixtures(t *testing.T, c client.Client) *e2eFixtures {
 		}
 	}
 	t.Cleanup(func() { cleanup(t, c, all...) })
+	return f
+}
+
+func createRealProviderFixtures(t *testing.T, c client.Client) *e2eFixtures {
+	t.Helper()
+	ctx := context.Background()
+
+	provider := os.Getenv("E2E_PROVIDER")
+	model := os.Getenv("E2E_MODEL")
+	keyPath := os.Getenv("E2E_PROVIDER_KEY_PATH")
+
+	if model == "" || keyPath == "" {
+		t.Fatalf("E2E_PROVIDER=%s requires E2E_MODEL and E2E_PROVIDER_KEY_PATH", provider)
+	}
+
+	creds, err := os.ReadFile(keyPath)
+	if err != nil {
+		t.Fatalf("read credentials file %s: %v", keyPath, err)
+	}
+
+	secretName := fmt.Sprintf("e2e-%s-secret", provider)
+	llmName := fmt.Sprintf("e2e-%s-llm", provider)
+
+	var llmSpec agenticv1alpha1.LLMProviderSpec
+	var secretData map[string][]byte
+
+	switch provider {
+	case "claude", "gemini":
+		projectID := os.Getenv("VERTEX_PROJECT_ID")
+		region := os.Getenv("VERTEX_REGION")
+		if projectID == "" {
+			t.Fatal("VERTEX_PROJECT_ID must be set for claude/gemini providers")
+		}
+		if region == "" {
+			region = "us-central1"
+		}
+
+		var modelProvider agenticv1alpha1.GoogleCloudVertexModelProvider
+		switch {
+		case strings.HasPrefix(model, "claude"):
+			modelProvider = agenticv1alpha1.GoogleCloudVertexModelProviderAnthropic
+		case strings.HasPrefix(model, "gemini"):
+			modelProvider = agenticv1alpha1.GoogleCloudVertexModelProviderGoogle
+		default:
+			t.Fatalf("cannot infer modelProvider from model %q", model)
+		}
+
+		secretData = map[string][]byte{"GOOGLE_APPLICATION_CREDENTIALS": creds}
+		llmSpec = agenticv1alpha1.LLMProviderSpec{
+			Type: agenticv1alpha1.LLMProviderGoogleCloudVertex,
+			GoogleCloudVertex: agenticv1alpha1.GoogleCloudVertexConfig{
+				CredentialsSecret: agenticv1alpha1.SecretReference{Name: secretName},
+				ProjectID:         projectID,
+				Region:            region,
+				ModelProvider:     modelProvider,
+			},
+		}
+
+	case "openai":
+		secretData = map[string][]byte{"OPENAI_API_KEY": creds}
+		llmSpec = agenticv1alpha1.LLMProviderSpec{
+			Type: agenticv1alpha1.LLMProviderOpenAI,
+			OpenAI: agenticv1alpha1.OpenAIConfig{
+				CredentialsSecret: agenticv1alpha1.SecretReference{Name: secretName},
+			},
+		}
+
+	default:
+		t.Fatalf("unsupported E2E_PROVIDER: %s", provider)
+	}
+
+	f := &e2eFixtures{
+		LLM: &agenticv1alpha1.LLMProvider{
+			ObjectMeta: metav1.ObjectMeta{Name: llmName},
+			Spec:       llmSpec,
+		},
+		Agent: &agenticv1alpha1.Agent{
+			ObjectMeta: metav1.ObjectMeta{Name: "e2e-agent"},
+			Spec: agenticv1alpha1.AgentSpec{
+				LLMProvider: agenticv1alpha1.LLMProviderReference{Name: llmName},
+				Model:       model,
+			},
+		},
+		Policy: &agenticv1alpha1.ApprovalPolicy{
+			ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
+			Spec: agenticv1alpha1.ApprovalPolicySpec{
+				Stages: []agenticv1alpha1.ApprovalPolicyStage{
+					{Name: agenticv1alpha1.SandboxStepAnalysis, Approval: agenticv1alpha1.ApprovalModeAutomatic},
+				},
+			},
+		},
+		LLMSecret: &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: testNS},
+			Data:       secretData,
+		},
+	}
+
+	stagingNS := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "staging"}}
+	if err := c.Create(ctx, stagingNS); err != nil && !apierrors.IsAlreadyExists(err) {
+		t.Fatalf("create staging namespace: %v", err)
+	}
+
+	all := []client.Object{f.LLM, f.Agent, f.Policy, f.LLMSecret}
+	cleanup(t, c, all...)
+	for _, obj := range all {
+		obj.SetResourceVersion("")
+		obj.SetUID("")
+		if err := c.Create(ctx, obj); err != nil {
+			t.Fatalf("create %T %s: %v", obj, obj.GetName(), err)
+		}
+	}
+	t.Cleanup(func() { cleanup(t, c, all...) })
+
+	t.Logf("Real provider fixtures created: provider=%s model=%s llm=%s", provider, model, llmName)
 	return f
 }
 
