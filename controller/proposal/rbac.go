@@ -213,7 +213,7 @@ func rbacTargetNamespaces(proposal *agenticv1alpha1.Proposal, rbacResult *agenti
 
 func truncateK8sName(name string) string {
 	if len(name) > 63 {
-		name = strings.TrimRight(name[:63], "-")
+		name = strings.TrimRight(name[:63], "-._")
 	}
 	return name
 }
