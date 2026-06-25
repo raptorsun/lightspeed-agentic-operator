@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -18,6 +19,7 @@ import (
 
 func newSandboxClient(objects ...client.Object) client.Client {
 	s := runtime.NewScheme()
+	utilruntime.Must(agenticv1alpha1.AddToScheme(s))
 
 	mapper := apimeta.NewDefaultRESTMapper([]schema.GroupVersion{
 		{Group: "extensions.agents.x-k8s.io", Version: "v1alpha1"},

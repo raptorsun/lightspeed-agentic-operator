@@ -95,6 +95,8 @@ type templateHashInput struct {
 	Step                string                              `json:"step"`
 	BaseResourceVersion string                              `json:"baseRV"`
 	ServiceAccount      string                              `json:"serviceAccount"`
+	AuditLogging        bool                                `json:"auditLogging"`
+	OTELEndpoint        string                              `json:"otelEndpoint,omitempty"`
 }
 
 func computeTemplateHash(
@@ -106,6 +108,7 @@ func computeTemplateHash(
 	step string,
 	baseResourceVersion string,
 	serviceAccount string,
+	audit *agenticv1alpha1.AuditConfig,
 ) (string, error) {
 	input := templateHashInput{
 		LLM:                 llm.Spec,
@@ -116,6 +119,8 @@ func computeTemplateHash(
 		Step:                step,
 		BaseResourceVersion: baseResourceVersion,
 		ServiceAccount:      serviceAccount,
+		AuditLogging:        audit.LoggingEnabled(),
+		OTELEndpoint:        audit.OTELEndpoint(),
 	}
 	data, err := json.Marshal(input)
 	if err != nil {
@@ -168,7 +173,11 @@ func EnsureAgentTemplate(
 		requiredSecrets = tools.RequiredSecrets
 	}
 
-	hash, err := computeTemplateHash(llm, agent.Spec.Model, skills, mcpServers, requiredSecrets, step, base.GetResourceVersion(), serviceAccount)
+	audit, err := readAuditConfig(ctx, c)
+	if err != nil {
+		return "", fmt.Errorf("read audit config: %w", err)
+	}
+	hash, err := computeTemplateHash(llm, agent.Spec.Model, skills, mcpServers, requiredSecrets, step, base.GetResourceVersion(), serviceAccount, audit)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ErrComputeTemplateHash, err)
 	}
@@ -220,6 +229,10 @@ func EnsureAgentTemplate(
 
 	if err := patchLLMCredentials(derived, llm, agent.Spec.Model); err != nil {
 		return "", fmt.Errorf("%s: %w", ErrPatchLLMCredentials, err)
+	}
+
+	if err := patchAuditEnvVars(derived, audit); err != nil {
+		return "", fmt.Errorf("patch audit env vars: %w", err)
 	}
 
 	if len(mcpServers) > 0 {
@@ -733,6 +746,20 @@ type mcpHeaderEnvEntry struct {
 	Name       string `json:"name"`
 	Source     string `json:"source"`
 	SecretName string `json:"secretName,omitempty"`
+}
+
+func patchAuditEnvVars(tmpl *unstructured.Unstructured, audit *agenticv1alpha1.AuditConfig) error {
+	if audit.LoggingEnabled() {
+		if err := setEnvVar(tmpl, "LIGHTSPEED_AUDIT_ENABLED", "true"); err != nil {
+			return fmt.Errorf("set LIGHTSPEED_AUDIT_ENABLED: %w", err)
+		}
+	}
+	if endpoint := audit.OTELEndpoint(); endpoint != "" {
+		if err := setEnvVar(tmpl, "OTEL_EXPORTER_OTLP_ENDPOINT", endpoint); err != nil {
+			return fmt.Errorf("set OTEL_EXPORTER_OTLP_ENDPOINT: %w", err)
+		}
+	}
+	return nil
 }
 
 func patchMCPServers(tmpl *unstructured.Unstructured, servers []agenticv1alpha1.MCPServerConfig) error {

@@ -67,6 +67,10 @@ func (m *BarePodManager) Claim(ctx context.Context, proposalName, step, _ string
 		return "", fmt.Errorf("%s: %w", ErrBuildPodSpec, err)
 	}
 
+	if err := appendAuditEnvVars(ctx, m.Client, &podSpec.Containers[0]); err != nil {
+		return "", fmt.Errorf("append audit env vars: %w", err)
+	}
+
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName,
