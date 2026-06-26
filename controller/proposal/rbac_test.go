@@ -477,6 +477,9 @@ func TestTruncateK8sName(t *testing.T) {
 		{"exactly_63", strings.Repeat("a", 63), strings.Repeat("a", 63)},
 		{"over_63", strings.Repeat("a", 70), strings.Repeat("a", 63)},
 		{"trailing_dash_trimmed", strings.Repeat("a", 60) + "---" + strings.Repeat("b", 5), strings.Repeat("a", 60)},
+		{"trailing_dot_trimmed", strings.Repeat("a", 60) + "..." + strings.Repeat("b", 5), strings.Repeat("a", 60)},
+		{"trailing_underscore_trimmed", strings.Repeat("a", 60) + "___" + strings.Repeat("b", 5), strings.Repeat("a", 60)},
+		{"trailing_mixed_trimmed", strings.Repeat("a", 58) + "-._.-" + strings.Repeat("b", 5), strings.Repeat("a", 58)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -776,5 +779,16 @@ func TestRBACLabels(t *testing.T) {
 	}
 	if len(labels) != 2 {
 		t.Fatalf("expected 2 labels, got %d", len(labels))
+	}
+}
+
+func TestRBACLabels_TruncatesLongProposalName(t *testing.T) {
+	longName := strings.Repeat("a", 80)
+	labels := rbacLabels(longName, "execution-rbac")
+	if len(labels[LabelProposal]) > 63 {
+		t.Fatalf("proposal label length %d exceeds 63", len(labels[LabelProposal]))
+	}
+	if labels[LabelProposal] != strings.Repeat("a", 63) {
+		t.Errorf("proposal label = %q, want %q", labels[LabelProposal], strings.Repeat("a", 63))
 	}
 }
