@@ -77,7 +77,7 @@ func emptyTemplate() *unstructured.Unstructured {
 
 func mustHash(t *testing.T, llm *agenticv1alpha1.LLMProvider, model string, skills []agenticv1alpha1.SkillsSource, requiredSecrets []agenticv1alpha1.SecretRequirement, phase string) string {
 	t.Helper()
-	h, err := computeTemplateHash(llm, model, skills, nil, requiredSecrets, phase, "", "")
+	h, err := computeTemplateHash(llm, model, skills, nil, requiredSecrets, phase, "", "", nil)
 	if err != nil {
 		t.Fatalf("computeTemplateHash: %v", err)
 	}
@@ -627,11 +627,11 @@ func TestComputeTemplateHash_DifferentBaseResourceVersion(t *testing.T) {
 	llm := testLLMProvider(agenticv1alpha1.LLMProviderGoogleCloudVertex)
 	skills := []agenticv1alpha1.SkillsSource{{Image: "quay.io/test/skills:latest"}}
 
-	h1, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "")
+	h1, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	h2, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "2000", "")
+	h2, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "2000", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -645,17 +645,38 @@ func TestComputeTemplateHash_SameBaseResourceVersion(t *testing.T) {
 	llm := testLLMProvider(agenticv1alpha1.LLMProviderGoogleCloudVertex)
 	skills := []agenticv1alpha1.SkillsSource{{Image: "quay.io/test/skills:latest"}}
 
-	h1, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "")
+	h1, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	h2, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "")
+	h2, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if h1 != h2 {
 		t.Error("same base template resourceVersion should produce same hash")
+	}
+}
+
+func TestComputeTemplateHash_DifferentAuditConfig(t *testing.T) {
+	llm := testLLMProvider(agenticv1alpha1.LLMProviderAnthropic)
+	skills := []agenticv1alpha1.SkillsSource{{Image: "quay.io/test/skills:latest"}}
+
+	h1, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	audit := &agenticv1alpha1.AuditConfig{
+		OTEL: agenticv1alpha1.AuditOTELConfig{Endpoint: "jaeger:4317"},
+	}
+	h2, err := computeTemplateHash(llm, "claude-opus-4-6", skills, nil, nil, "analysis", "1000", "", audit)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if h1 == h2 {
+		t.Error("different audit config should produce different hashes")
 	}
 }
 

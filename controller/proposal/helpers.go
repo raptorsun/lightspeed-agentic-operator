@@ -72,6 +72,17 @@ func isSuspended(ctx context.Context, c client.Client) (bool, error) {
 	return config.Spec.Suspended, nil
 }
 
+func readAuditConfig(ctx context.Context, c client.Client) (*agenticv1alpha1.AuditConfig, error) {
+	var config agenticv1alpha1.AgenticOLSConfig
+	if err := c.Get(ctx, client.ObjectKey{Name: "cluster"}, &config); err != nil {
+		if client.IgnoreNotFound(err) == nil {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &config.Spec.Audit, nil
+}
+
 // failStep marks a step as failed and creates a failure result CR.
 // The caller must have set the step condition to ConditionUnknown before
 // calling failStep so that conditionTime can extract the start time.
