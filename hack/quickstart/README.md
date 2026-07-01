@@ -61,9 +61,54 @@ The [`examples/`](examples/) directory contains LLMProvider + Agent templates:
 | [`vertex-anthropic.yaml`](examples/vertex-anthropic.yaml) | Vertex AI with Claude |
 | [`vertex-google.yaml`](examples/vertex-google.yaml) | Vertex AI with Gemini |
 
+## CLI Plugin
+
+Install the `oc-agentic` CLI plugin to manage proposals from the command line:
+
+```bash
+# Linux amd64
+curl -L https://github.com/openshift/lightspeed-agentic-operator/releases/latest/download/oc-agentic_linux_amd64.tar.gz | tar xz
+sudo mv oc-agentic /usr/local/bin/
+
+# macOS Apple Silicon
+curl -L https://github.com/openshift/lightspeed-agentic-operator/releases/latest/download/oc-agentic_darwin_arm64.tar.gz | tar xz
+sudo mv oc-agentic /usr/local/bin/
+```
+
+Verify installation:
+
+```bash
+oc agentic version
+```
+
 ## Example Proposal
 
 [`deploy-test-workload.yaml`](examples/deploy-test-workload.yaml) submits a
 proposal that analyzes the target namespace and deploys a test workload
 (nginx Deployment + Service). Execution requires manual approval via
 `ProposalApproval`.
+
+### Using the CLI
+
+Instead of applying YAML, you can create and manage proposals with the CLI:
+
+```bash
+# Create a proposal
+oc agentic proposal create --request="Deploy a test nginx workload" --target-namespaces=default
+
+# Watch it progress
+oc agentic proposal list
+oc agentic proposal get <name>
+
+# Approve analysis, then execution
+oc agentic proposal approve <name> --stage=analysis
+oc agentic proposal approve <name> --stage=execution --option=0
+
+# Stream sandbox logs
+oc agentic proposal logs <name> -f
+
+# Check system status
+oc agentic status
+```
+
+See the [CLI reference](../../README.md#cli-plugin-oc-agentic) for all commands and flags.
