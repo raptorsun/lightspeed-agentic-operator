@@ -42,9 +42,13 @@ spec:
           volumeMounts:
             - name: home
               mountPath: /home/agent
+            - name: skills-workdir
+              mountPath: /app/skills/.agents
       volumes:
         - name: skills
           image:
             reference: placeholder:latest
         - name: home
+          emptyDir: {}
+        - name: skills-workdir
           emptyDir: {}

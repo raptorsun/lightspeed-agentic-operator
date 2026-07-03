@@ -214,8 +214,15 @@ func (b *PodSpecBuilder) buildSkills(skills []agenticv1alpha1.SkillsSource) ([]c
 			},
 		},
 	}
+	workdirVol := corev1.Volume{
+		Name:         "skills-workdir",
+		VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+	}
 
-	var mounts []corev1.VolumeMount
+	mounts := []corev1.VolumeMount{{
+		Name:      "skills-workdir",
+		MountPath: "/app/skills/.agents",
+	}}
 	if len(s.Paths) > 0 {
 		baseMountPath := "/app/skills"
 		for _, p := range s.Paths {
@@ -230,7 +237,7 @@ func (b *PodSpecBuilder) buildSkills(skills []agenticv1alpha1.SkillsSource) ([]c
 		}
 	}
 
-	return []corev1.Volume{vol}, mounts
+	return []corev1.Volume{vol, workdirVol}, mounts
 }
 
 func (b *PodSpecBuilder) buildMCPServers(servers []agenticv1alpha1.MCPServerConfig) ([]corev1.Volume, []corev1.VolumeMount, []corev1.EnvVar, error) {
