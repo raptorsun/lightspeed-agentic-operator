@@ -81,18 +81,27 @@ type DiagnosisResult struct {
 }
 
 // ProposedAction describes a single discrete action the analysis agent
-// recommends as part of its remediation plan. Actions are displayed to
-// the user after analysis for review before approval.
+// recommends as part of its remediation plan. Each action contains an
+// exact executable bash command and is displayed to the user after
+// analysis for review before approval.
 type ProposedAction struct {
-	// type is the action category (e.g., "patch", "scale", "restart",
-	// "create", "delete", "rollout"). Free-form string to allow agents
-	// to express domain-specific action types. Must be 1-256 characters.
+	// command is the exact executable bash command using kubectl or oc
+	// (e.g., "kubectl set image deployment/foo container=registry/foo:v1.3 -n production").
+	// Must be a concrete command that can be copy-pasted and run.
+	// Maximum 4096 characters.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=4096
+	Command string `json:"command,omitempty"`
+	// type is the action phase category: "pre-check", "mutation", "wait",
+	// or "post-check". Free-form string to allow agents to express
+	// domain-specific action types. Must be 1-256 characters.
 	// +required
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:MaxLength=256
 	Type string `json:"type,omitempty"`
-	// description is a Markdown-formatted explanation of what this action
-	// will do (e.g., "Increase memory limit from 256Mi to 512Mi").
+	// description is a Markdown-formatted explanation of what this command
+	// does and why (e.g., "Increase memory limit from 256Mi to 512Mi").
 	// Maximum 4096 characters.
 	// +required
 	// +kubebuilder:validation:MinLength=1

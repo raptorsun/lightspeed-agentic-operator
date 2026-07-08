@@ -65,7 +65,7 @@ func (s *StubAgentCaller) Analyze(_ context.Context, _ *agenticv1alpha1.Proposal
 			},
 			Proposal: agenticv1alpha1.ProposalResult{
 				Description: "Stub proposal",
-				Actions:     []agenticv1alpha1.ProposedAction{{Type: "stub", Description: "Stub action"}},
+				Actions:     []agenticv1alpha1.ProposedAction{{Command: "kubectl get pods -n default", Type: "pre-check", Description: "Stub action"}},
 				Risk:        "Low",
 				Reversible:  agenticv1alpha1.ReversibilityReversible,
 			},
