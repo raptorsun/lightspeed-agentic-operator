@@ -456,6 +456,9 @@ func TestSandboxAgentCaller_ExecutionQueryFraming(t *testing.T) {
 	if strings.Contains(httpClient.lastQuery, "Pod crashing with OOMKilled") {
 		t.Error("execution query should NOT contain the original request")
 	}
+	if !strings.Contains(httpClient.lastQuery, "dry-run") {
+		t.Error("execution query should instruct dry-run before mutations")
+	}
 }
 
 func TestSandboxAgentCaller_VerificationQueryFraming(t *testing.T) {
