@@ -38,14 +38,15 @@ var AnalysisOutputSchema = json.RawMessage(`{
               "description": { "type": "string", "description": "Markdown-formatted summary of the overall remediation approach" },
               "actions": {
                 "type": "array",
-                "description": "Ordered list of discrete actions to perform",
+                "description": "Ordered list of exact bash commands to execute. Each action is one command.",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "type": { "type": "string", "description": "Action category (e.g., 'patch', 'scale', 'restart', 'create', 'delete', 'rollout')" },
-                    "description": { "type": "string", "description": "What this action does (e.g., 'Increase memory limit from 256Mi to 512Mi')" }
+                    "command": { "type": "string", "description": "Exact executable bash command using kubectl or oc (e.g., 'kubectl set image deployment/foo container=registry/foo:v1.3 -n production')" },
+                    "type": { "type": "string", "description": "Action phase category (e.g., 'pre-check', 'mutation', 'wait', 'post-check')" },
+                    "description": { "type": "string", "description": "What this command does and why" }
                   },
-                  "required": ["type", "description"]
+                  "required": ["command", "type", "description"]
                 }
               },
               "risk": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"], "description": "Risk assessment. Low: safe to apply. Medium: review recommended. High: careful review required. Critical: manual approval strongly recommended" },

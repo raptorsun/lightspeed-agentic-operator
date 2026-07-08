@@ -150,6 +150,23 @@ func TestAnalysisOutputSchema_OptionsStructure(t *testing.T) {
 	if requiredSet["rbac"] {
 		t.Error("rbac should not be required — advisory proposals may omit it")
 	}
+
+	proposal := itemProps["proposal"].(map[string]any)
+	proposalProps := proposal["properties"].(map[string]any)
+	actions := proposalProps["actions"].(map[string]any)
+	actionItems := actions["items"].(map[string]any)
+	actionProps := actionItems["properties"].(map[string]any)
+	if _, ok := actionProps["command"]; !ok {
+		t.Error("actions items should have 'command' property")
+	}
+	actionRequired := actionItems["required"].([]any)
+	actionRequiredSet := map[string]bool{}
+	for _, r := range actionRequired {
+		actionRequiredSet[r.(string)] = true
+	}
+	if !actionRequiredSet["command"] {
+		t.Error("'command' should be required in actions items")
+	}
 }
 
 func TestVerificationOutputSchema_ChecksUseResultNotPassed(t *testing.T) {

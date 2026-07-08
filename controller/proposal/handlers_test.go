@@ -692,7 +692,7 @@ func TestReconcile_ExecutionRBACCreatedOnApproval(t *testing.T) {
 			},
 			Proposal: agenticv1alpha1.ProposalResult{
 				Description: "Increase to 512Mi",
-				Actions:     []agenticv1alpha1.ProposedAction{{Type: "patch", Description: "Patch deploy"}},
+				Actions:     []agenticv1alpha1.ProposedAction{{Command: "kubectl patch deployment/web -n production -p '{}'", Type: "mutation", Description: "Patch deploy"}},
 				Risk:        "Low",
 				Reversible:  agenticv1alpha1.ReversibilityReversible,
 			},
@@ -777,7 +777,7 @@ func TestReconcile_ExecutionRBACCleanedOnFailure(t *testing.T) {
 			},
 			Proposal: agenticv1alpha1.ProposalResult{
 				Description: "Apply fix",
-				Actions:     []agenticv1alpha1.ProposedAction{{Type: "patch", Description: "Patch"}},
+				Actions:     []agenticv1alpha1.ProposedAction{{Command: "kubectl patch deployment/web -n production -p '{}'", Type: "mutation", Description: "Patch"}},
 				Risk:        "Low",
 				Reversible:  agenticv1alpha1.ReversibilityReversible,
 			},
@@ -837,7 +837,7 @@ func TestFullLifecycle_WithSandboxAgent(t *testing.T) {
 			},
 			Proposal: agenticv1alpha1.ProposalResult{
 				Description: "Increase deployment memory limit to 512Mi",
-				Actions:     []agenticv1alpha1.ProposedAction{{Type: "patch", Description: "Patch deployment memory limit"}},
+				Actions:     []agenticv1alpha1.ProposedAction{{Command: "kubectl set resources deployment/web -n production --limits=memory=512Mi", Type: "mutation", Description: "Patch deployment memory limit"}},
 				Risk:        "Low",
 				Reversible:  agenticv1alpha1.ReversibilityReversible,
 			},

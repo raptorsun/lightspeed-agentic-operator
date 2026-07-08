@@ -439,7 +439,7 @@ func TestSandboxAgentCaller_ExecutionQueryFraming(t *testing.T) {
 		Title: "Increase memory limit",
 		Proposal: agenticv1alpha1.ProposalResult{
 			Description: "Patch deployment memory",
-			Actions:     []agenticv1alpha1.ProposedAction{{Type: "patch", Description: "Set memory to 512Mi"}},
+			Actions:     []agenticv1alpha1.ProposedAction{{Command: "kubectl set resources deployment/web -n production --limits=memory=512Mi", Type: "mutation", Description: "Set memory to 512Mi"}},
 			Risk:        "Low",
 		},
 	}
