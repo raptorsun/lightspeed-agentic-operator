@@ -142,7 +142,7 @@ func TestBarePodManager_Claim_TerminatingPodReplacedAfterDeletion(t *testing.T) 
 	fc := newBarePodClient().WithObjects(existing).Build()
 	builder := &PodSpecBuilder{Image: "quay.io/test/sandbox:latest"}
 	m := NewBarePodManager(fc, builder, "test-ns")
-	m.DeletionTimeout = 6 * time.Second
+	m.DeletionTimeout = 30 * time.Second
 	m.SetStep(
 		&agenticv1alpha1.Agent{Spec: agenticv1alpha1.AgentSpec{Model: "m"}},
 		testLLMProvider(agenticv1alpha1.LLMProviderAnthropic),
@@ -151,9 +151,10 @@ func TestBarePodManager_Claim_TerminatingPodReplacedAfterDeletion(t *testing.T) 
 	)
 
 	// Remove the finalizer after a short delay so the fake client
-	// allows the pod to disappear.
+	// allows the pod to disappear. The generous DeletionTimeout above
+	// avoids flakiness on slow CI nodes.
 	go func() {
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 		var pod corev1.Pod
 		key := types.NamespacedName{Name: "ls-analysis-my-proposal", Namespace: "test-ns"}
 		if err := fc.Get(t.Context(), key, &pod); err != nil {

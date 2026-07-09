@@ -105,6 +105,9 @@ func (m *BarePodManager) Claim(ctx context.Context, proposalName, step, _ string
 			return "", fmt.Errorf("wait for terminating pod %q: %w", podName, err)
 		}
 		if err := m.Client.Create(ctx, pod); err != nil {
+			if apierrors.IsAlreadyExists(err) {
+				return podName, nil
+			}
 			return "", fmt.Errorf("%s %s: %w", ErrCreatePod, step, err)
 		}
 	}
@@ -166,17 +169,21 @@ func (m *BarePodManager) waitForDeletion(ctx context.Context, key types.Namespac
 	defer ticker.Stop()
 
 	for {
+		var pod corev1.Pod
+		err := m.Client.Get(ctx, key, &pod)
+		switch {
+		case apierrors.IsNotFound(err):
+			return nil
+		case err != nil:
+			return fmt.Errorf("get pod %q: %w", key.Name, err)
+		}
+		if time.Now().After(deadline) {
+			return fmt.Errorf("timeout waiting for pod %q to be deleted after %s", key.Name, timeout)
+		}
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if time.Now().After(deadline) {
-				return fmt.Errorf("timeout waiting for pod %q to be deleted after %s", key.Name, timeout)
-			}
-			var pod corev1.Pod
-			if err := m.Client.Get(ctx, key, &pod); apierrors.IsNotFound(err) {
-				return nil
-			}
 		}
 	}
 }
